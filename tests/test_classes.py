@@ -1,6 +1,8 @@
+from abc import ABC
+
 import pytest
 
-from src.classes import Category, LawnGrass, Product, Smartphone
+from src.classes import BaseProduct, Category, LawnGrass, Product, Smartphone
 
 
 @pytest.fixture(autouse=True)
@@ -82,6 +84,20 @@ def lawn_grass() -> LawnGrass:
     )
 
 
+def test_base_product_is_abstract() -> None:
+    """Проверяет, что BaseProduct является абстрактным классом."""
+
+    assert issubclass(BaseProduct, ABC)
+
+    with pytest.raises(TypeError):
+        BaseProduct(
+            "Товар",
+            "Описание",
+            100.0,
+            1,
+        )
+
+
 def test_product_initialization(product: Product) -> None:
     """Проверяет корректность инициализации Product."""
 
@@ -89,6 +105,12 @@ def test_product_initialization(product: Product) -> None:
     assert product.description == "256GB, серый цвет, 200MP камера"
     assert product.price == 180000.0
     assert product.quantity == 5
+
+
+def test_product_inherits_base_product(product: Product) -> None:
+    """Проверяет наследование Product от BaseProduct."""
+
+    assert isinstance(product, BaseProduct)
 
 
 def test_smartphone_initialization(
@@ -116,6 +138,24 @@ def test_lawn_grass_initialization(
     assert lawn_grass.country == "Россия"
     assert lawn_grass.germination_period == "7 дней"
     assert lawn_grass.color == "Зеленый"
+
+
+def test_creation_info_mixin(capsys) -> None:
+    """Проверяет вывод информации при создании Product."""
+
+    Product(
+        "Тестовый товар",
+        "Описание",
+        1000.0,
+        3,
+    )
+
+    captured = capsys.readouterr()
+
+    assert (
+        "Product('Тестовый товар', 'Описание', 1000.0, 3)"
+        in captured.out
+    )
 
 
 def test_category_initialization(

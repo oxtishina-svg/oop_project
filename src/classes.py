@@ -1,6 +1,31 @@
-class Product:
-    """Класс для представления товара."""
+from abc import ABC, abstractmethod
+from typing import Any
 
+
+class ProductsString(str):
+    """Строка со списком товаров, поддерживающая подсчет товаров через len()."""
+
+    product_count: int
+
+    def __new__(
+        cls,
+        value: str,
+        product_count: int,
+    ) -> "ProductsString":
+        obj = str.__new__(cls, value)
+        obj.product_count = product_count
+        return obj
+
+    def __len__(self) -> int:
+        """Возвращает количество товаров."""
+
+        return self.product_count
+
+
+class BaseProduct(ABC):
+    """Абстрактный базовый класс для товаров."""
+
+    @abstractmethod
     def __init__(
         self,
         name: str,
@@ -12,17 +37,6 @@ class Product:
         self.description = description
         self.__price = price
         self.quantity = quantity
-
-    @classmethod
-    def new_product(cls, product_data: dict) -> "Product":
-        """Создает новый товар из словаря."""
-
-        return cls(
-            product_data["name"],
-            product_data["description"],
-            product_data["price"],
-            product_data["quantity"],
-        )
 
     @property
     def price(self) -> float:
@@ -40,15 +54,7 @@ class Product:
 
         self.__price = new_price
 
-    def __str__(self) -> str:
-        """Возвращает строковое представление товара."""
-
-        return (
-            f"{self.name}, {self.price} руб. "
-            f"Остаток: {self.quantity} шт."
-        )
-
-    def __add__(self, other: "Product") -> float:
+    def __add__(self, other: "BaseProduct") -> float:
         """Возвращает общую стоимость запасов двух товаров."""
 
         if type(self) is not type(other):
@@ -59,6 +65,65 @@ class Product:
         return (
             self.price * self.quantity
             + other.price * other.quantity
+        )
+
+
+class CreationInfoMixin:
+    """Миксин для вывода информации о созданном объекте."""
+
+    def __init__(
+        self,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+
+        arguments = [repr(argument) for argument in args]
+        arguments.extend(
+            f"{key}={value!r}"
+            for key, value in kwargs.items()
+        )
+
+        print(
+            f"{self.__class__.__name__}"
+            f"({', '.join(arguments)})"
+        )
+
+
+class Product(CreationInfoMixin, BaseProduct):
+    """Класс для представления товара."""
+
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        price: float,
+        quantity: int,
+    ) -> None:
+        super().__init__(
+            name,
+            description,
+            price,
+            quantity,
+        )
+
+    @classmethod
+    def new_product(cls, product_data: dict) -> "Product":
+        """Создает новый товар из словаря."""
+
+        return cls(
+            product_data["name"],
+            product_data["description"],
+            product_data["price"],
+            product_data["quantity"],
+        )
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление товара."""
+
+        return (
+            f"{self.name}, {self.price} руб. "
+            f"Остаток: {self.quantity} шт."
         )
 
 
@@ -152,7 +217,10 @@ class Category:
         for product in self.__products:
             products_string += f"{product}\n"
 
-        return products_string
+        return ProductsString(
+            products_string,
+            len(self.__products),
+        )
 
     def __str__(self) -> str:
         """Возвращает строковое представление категории."""
