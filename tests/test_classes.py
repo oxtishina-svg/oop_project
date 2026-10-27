@@ -52,16 +52,52 @@ def test_category_initialization(
 
     category = Category(
         "Смартфоны",
-        "Смартфоны, как средство не только коммуникации",
+        "Описание категории",
         [product, second_product],
     )
 
     assert category.name == "Смартфоны"
-    assert (
-        category.description
-        == "Смартфоны, как средство не только коммуникации"
+    assert category.description == "Описание категории"
+    assert Category.category_count == 1
+    assert Category.product_count == 2
+
+
+def test_category_products(
+    product: Product,
+    second_product: Product,
+) -> None:
+    """Проверяет геттер списка товаров."""
+
+    category = Category(
+        "Смартфоны",
+        "Описание категории",
+        [product, second_product],
     )
-    assert category.products == [product, second_product]
+
+    expected = (
+        "Samsung Galaxy S23 Ultra, 180000.0 руб. Остаток: 5 шт.\n"
+        "Iphone 15, 210000.0 руб. Остаток: 8 шт.\n"
+    )
+
+    assert category.products == expected
+
+
+def test_add_product(
+    product: Product,
+    second_product: Product,
+) -> None:
+    """Проверяет добавление товара в категорию."""
+
+    category = Category(
+        "Смартфоны",
+        "Описание категории",
+        [product],
+    )
+
+    category.add_product(second_product)
+
+    assert Category.product_count == 2
+    assert "Iphone 15" in category.products
 
 
 def test_category_count(
@@ -97,3 +133,52 @@ def test_product_count(
     )
 
     assert Category.product_count == 2
+
+
+def test_new_product() -> None:
+    """Проверяет создание товара через classmethod."""
+
+    product_data = {
+        "name": "Xiaomi Redmi Note 11",
+        "description": "1024GB, Синий",
+        "price": 31000.0,
+        "quantity": 14,
+    }
+
+    product = Product.new_product(product_data)
+
+    assert product.name == "Xiaomi Redmi Note 11"
+    assert product.description == "1024GB, Синий"
+    assert product.price == 31000.0
+    assert product.quantity == 14
+
+
+def test_price_getter(product: Product) -> None:
+    """Проверяет геттер цены."""
+
+    assert product.price == 180000.0
+
+
+def test_price_setter(product: Product) -> None:
+    """Проверяет изменение цены."""
+
+    product.price = 190000.0
+
+    assert product.price == 190000.0
+
+
+def test_price_setter_invalid(
+    product: Product,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Проверяет запрет нулевой и отрицательной цены."""
+
+    product.price = 0
+
+    captured = capsys.readouterr()
+
+    assert product.price == 180000.0
+    assert (
+        "Цена не должна быть нулевая или отрицательная"
+        in captured.out
+    )
