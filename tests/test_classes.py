@@ -1,6 +1,6 @@
 import pytest
 
-from src.classes import Category, Product
+from src.classes import Category, LawnGrass, Product, Smartphone
 
 
 @pytest.fixture(autouse=True)
@@ -35,6 +35,53 @@ def second_product() -> Product:
     )
 
 
+@pytest.fixture
+def smartphone() -> Smartphone:
+    """Создает тестовый смартфон."""
+
+    return Smartphone(
+        "Samsung Galaxy S23 Ultra",
+        "256GB, серый цвет, 200MP камера",
+        180000.0,
+        5,
+        95.5,
+        "S23 Ultra",
+        256,
+        "Серый",
+    )
+
+
+@pytest.fixture
+def second_smartphone() -> Smartphone:
+    """Создает второй тестовый смартфон."""
+
+    return Smartphone(
+        "Iphone 15",
+        "512GB, Gray space",
+        210000.0,
+        8,
+        90.0,
+        "15",
+        512,
+        "Gray space",
+    )
+
+
+@pytest.fixture
+def lawn_grass() -> LawnGrass:
+    """Создает тестовую газонную траву."""
+
+    return LawnGrass(
+        "Газонная трава",
+        "Элитная трава для газона",
+        500.0,
+        20,
+        "Россия",
+        "7 дней",
+        "Зеленый",
+    )
+
+
 def test_product_initialization(product: Product) -> None:
     """Проверяет корректность инициализации Product."""
 
@@ -42,6 +89,33 @@ def test_product_initialization(product: Product) -> None:
     assert product.description == "256GB, серый цвет, 200MP камера"
     assert product.price == 180000.0
     assert product.quantity == 5
+
+
+def test_smartphone_initialization(
+    smartphone: Smartphone,
+) -> None:
+    """Проверяет корректность инициализации Smartphone."""
+
+    assert smartphone.name == "Samsung Galaxy S23 Ultra"
+    assert smartphone.price == 180000.0
+    assert smartphone.quantity == 5
+    assert smartphone.efficiency == 95.5
+    assert smartphone.model == "S23 Ultra"
+    assert smartphone.memory == 256
+    assert smartphone.color == "Серый"
+
+
+def test_lawn_grass_initialization(
+    lawn_grass: LawnGrass,
+) -> None:
+    """Проверяет корректность инициализации LawnGrass."""
+
+    assert lawn_grass.name == "Газонная трава"
+    assert lawn_grass.price == 500.0
+    assert lawn_grass.quantity == 20
+    assert lawn_grass.country == "Россия"
+    assert lawn_grass.germination_period == "7 дней"
+    assert lawn_grass.color == "Зеленый"
 
 
 def test_category_initialization(
@@ -98,6 +172,37 @@ def test_add_product(
 
     assert Category.product_count == 2
     assert "Iphone 15" in category.products
+
+
+def test_add_smartphone_to_category(
+    product: Product,
+    smartphone: Smartphone,
+) -> None:
+    """Проверяет добавление наследника Product в категорию."""
+
+    category = Category(
+        "Товары",
+        "Описание категории",
+        [product],
+    )
+
+    category.add_product(smartphone)
+
+    assert Category.product_count == 2
+    assert "Samsung Galaxy S23 Ultra" in category.products
+
+
+def test_add_invalid_object_to_category(product: Product) -> None:
+    """Проверяет запрет добавления постороннего объекта."""
+
+    category = Category(
+        "Товары",
+        "Описание категории",
+        [product],
+    )
+
+    with pytest.raises(TypeError):
+        category.add_product("не товар")  # type: ignore[arg-type]
 
 
 def test_category_count(
@@ -214,8 +319,29 @@ def test_product_add(
     product: Product,
     second_product: Product,
 ) -> None:
-    """Проверяет сложение стоимости запасов двух товаров."""
+    """Проверяет сложение двух Product."""
 
     result = product + second_product
 
     assert result == 2580000.0
+
+
+def test_smartphone_add(
+    smartphone: Smartphone,
+    second_smartphone: Smartphone,
+) -> None:
+    """Проверяет сложение двух Smartphone."""
+
+    result = smartphone + second_smartphone
+
+    assert result == 2580000.0
+
+
+def test_add_different_product_types(
+    smartphone: Smartphone,
+    lawn_grass: LawnGrass,
+) -> None:
+    """Проверяет запрет сложения товаров разных классов."""
+
+    with pytest.raises(TypeError):
+        smartphone + lawn_grass
