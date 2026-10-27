@@ -107,6 +107,21 @@ def test_product_initialization(product: Product) -> None:
     assert product.quantity == 5
 
 
+def test_product_zero_quantity() -> None:
+    """Проверяет запрет создания товара с нулевым количеством."""
+
+    with pytest.raises(
+        ValueError,
+        match="Товар с нулевым количеством не может быть добавлен",
+    ):
+        Product(
+            "Бракованный товар",
+            "Неверное количество",
+            1000.0,
+            0,
+        )
+
+
 def test_product_inherits_base_product(product: Product) -> None:
     """Проверяет наследование Product от BaseProduct."""
 
@@ -278,6 +293,33 @@ def test_product_count(
     )
 
     assert Category.product_count == 2
+
+
+def test_middle_price(
+    product: Product,
+    second_product: Product,
+) -> None:
+    """Проверяет расчет средней цены товаров."""
+
+    category = Category(
+        "Смартфоны",
+        "Описание категории",
+        [product, second_product],
+    )
+
+    assert category.middle_price() == 195000.0
+
+
+def test_middle_price_empty_category() -> None:
+    """Проверяет среднюю цену пустой категории."""
+
+    category = Category(
+        "Пустая категория",
+        "Категория без продуктов",
+        [],
+    )
+
+    assert category.middle_price() == 0
 
 
 def test_new_product() -> None:

@@ -33,6 +33,11 @@ class BaseProduct(ABC):
         price: float,
         quantity: int,
     ) -> None:
+        if quantity == 0:
+            raise ValueError(
+                "Товар с нулевым количеством не может быть добавлен"
+            )
+
         self.name = name
         self.description = description
         self.__price = price
@@ -221,6 +226,18 @@ class Category:
             products_string,
             len(self.__products),
         )
+
+    def middle_price(self) -> float:
+        """Возвращает среднюю цену товаров категории."""
+
+        try:
+            total_price = sum(
+                product.price
+                for product in self.__products
+            )
+            return total_price / len(self.__products)
+        except ZeroDivisionError:
+            return 0
 
     def __str__(self) -> str:
         """Возвращает строковое представление категории."""
