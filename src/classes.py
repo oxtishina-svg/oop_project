@@ -40,6 +40,22 @@ class Product:
 
         self.__price = new_price
 
+    def __str__(self) -> str:
+        """Возвращает строковое представление товара."""
+
+        return (
+            f"{self.name}, {self.price} руб. "
+            f"Остаток: {self.quantity} шт."
+        )
+
+    def __add__(self, other: "Product") -> float:
+        """Возвращает общую стоимость запасов двух товаров."""
+
+        return (
+            self.price * self.quantity
+            + other.price * other.quantity
+        )
+
 
 class Category:
     """Класс для представления категории товаров."""
@@ -73,9 +89,19 @@ class Category:
         products_string = ""
 
         for product in self.__products:
-            products_string += (
-                f"{product.name}, {product.price} руб. "
-                f"Остаток: {product.quantity} шт.\n"
-            )
+            products_string += f"{product}\n"
 
         return products_string
+
+    def __str__(self) -> str:
+        """Возвращает строковое представление категории."""
+
+        total_quantity = sum(
+            product.quantity
+            for product in self.__products
+        )
+
+        return (
+            f"{self.name}, количество продуктов: "
+            f"{total_quantity} шт."
+        )
